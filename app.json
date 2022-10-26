@@ -18,7 +18,12 @@
       "**/*"
     ],
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "infoPlist": {
+        "NSCameraUsageDescription": "This app uses the camera to scan barcodes."
+      },
+      "icon": "./assets/icon.png",
+      "bundleIdentifier": "com.buidlguidl.scaffoldwallet"
     },
     "android": {
       "adaptiveIcon": {
