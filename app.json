@@ -20,7 +20,8 @@
     "ios": {
       "supportsTablet": true,
       "infoPlist": {
-        "NSCameraUsageDescription": "This app uses the camera to scan barcodes."
+        "NSCameraUsageDescription": "This app uses the camera to scan barcodes.",
+        "CFBundleIconName": "icon.png"
       },
       "icon": "./assets/icon.png",
       "bundleIdentifier": "com.buidlguidl.scaffoldwallet"
