@@ -23,13 +23,6 @@
         "backgroundColor": "#FFFFFF"
       }
     },
-    "ios": {
-      "supportsTablet": true,
-      "infoPlist": {
-        "NSCameraUsageDescription": "This app uses the camera to scan barcodes.",
-      },
-      "bundleIdentifier": "com.buidlguidl.scaffoldwallet"
-    },
     "web": {
       "favicon": "./assets/favicon.png"
     }

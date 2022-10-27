@@ -11,8 +11,14 @@ module.exports = {
       TENDERLY_PROJECT: process.env.TENDERLY_PROJECT,
       TENDERLY_ACCESS_KEY: process.env.TENDERLY_ACCESS_KEY,
     },
-    ios: {
-      "bundleIdentifier": "com.buidlguidl.scaffoldwallet"
+    "ios": {
+      "supportsTablet": true,
+      "infoPlist": {
+        "NSCameraUsageDescription": "This app uses the camera to scan barcodes.",
+        "CFBundleIconName": "icon.png"
+      },
+      "bundleIdentifier": "com.buidlguidl.scaffoldwallet",
+      "icon": "./assets/icon.png",
     }
   }
 };
