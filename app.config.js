@@ -9,5 +9,10 @@ module.exports = {
     TENDERLY_USER: process.env.TENDERLY_USER,
     TENDERLY_PROJECT: process.env.TENDERLY_PROJECT,
     TENDERLY_ACCESS_KEY: process.env.TENDERLY_ACCESS_KEY,
+  },
+  "expo": {
+    "ios": {
+      "bundleIdentifier": "com.buidlguidl.scaffoldwallet"
+    }
   }
 };
