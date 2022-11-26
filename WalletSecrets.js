@@ -9,58 +9,43 @@ import AccountSelector from "./AccountSelector";
 const { handleActiveAccountIndex, handleAccountIndexesArray, setActiveAccountIndexToStorage } = require('./AccountHelper');
 const { generateWallet, storeWallet } = require('./WalletImportHelper');
 
-export default function WalletSecrets( { navigation } ) {
+export default function WalletSecrets({ activeAccountIndex, setActiveAccountIndex, accountIndexesArray, setAccountIndexesArray }) {
     log("WalletSecrets")
     const [walletImport, setWalletImport] = useState();
-    const [activeAccountIndex, setActiveAccountIndex] = useState(0);
-    const [accountIndexesArray, setAccountIndexesArray] = useState(null);
-
-    useEffect(() => {
-        if (walletImport) {
-            return;
-        }
-        handleActiveAccountIndex(setActiveAccountIndex);
-        handleAccountIndexesArray(setAccountIndexesArray);
-    }, [walletImport]);
-
-    useEffect(() => {
-        const navigationListener = navigation.addListener('tabPress', (e) => {
-            handleActiveAccountIndex(setActiveAccountIndex);
-        });
-
-        return navigationListener;
-    }, [navigation]);
 
     const generateAccount = async () => {
         const wallet = generateWallet();
         
-        const activeAccountIndex = await storeWallet(wallet.privateKey, wallet.mnemonic.phrase, 0, "");
-        setActiveAccount(activeAccountIndex);
+        const newAccountIndex = await storeWallet(wallet.privateKey, wallet.mnemonic.phrase, 0, "");
+        handleNewAccount(newAccountIndex);
     }
 
-    const setActiveAccount = (activeAccountIndex) => {
-        setActiveAccountIndexToStorage(activeAccountIndex);
-        setActiveAccountIndex(activeAccountIndex);
+    const handleNewAccount = (newAccountIndex) => {
+        setActiveAccountIndexToStorage(newAccountIndex);
+
+        let newAccountIndexesArray = JSON.parse(JSON.stringify(accountIndexesArray)); // Deep copy, not sure if this is really needed
+        newAccountIndexesArray.push(newAccountIndex);
+        setAccountIndexesArrayToStorage(newAccountIndexesArray);
+
+        setActiveAccountIndex(newAccountIndex);
+        setAccountIndexesArray(newAccountIndexesArray);
     }
 
     if (walletImport) {
         return (
             <>
-                <WalletImport setWalletImport={setWalletImport} setActiveAccount={setActiveAccount} />
+                <WalletImport setWalletImport={setWalletImport} handleNewAccount={handleNewAccount} />
             </>
         );
     }
 
 	return (
         <>
-            {accountIndexesArray && 
-                <AccountSelector
-                    activeAccountIndex={activeAccountIndex}
-                    setActiveAccountIndex={setActiveAccountIndex}
-                    accountIndexesArray={accountIndexesArray}
-                    storage={false}
-                />
-            }
+            <AccountSelector
+                activeAccountIndex={activeAccountIndex}
+                setActiveAccountIndex={setActiveAccountIndex}
+                accountIndexesArray={accountIndexesArray}
+            />
         	<WalletRevealKey activeAccountIndex={activeAccountIndex}/>
             <Button title={'Import'} onPress={() => setWalletImport(true)} />
             <Button title={'Generate'} onPress={() => generateAccount()} />

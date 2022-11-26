@@ -1,38 +1,23 @@
 import React, { useState, useEffect } from "react";
-import { Text } from 'react-native';
+import { Text, View , useWindowDimensions} from 'react-native';
 
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import * as SecureStore from 'expo-secure-store';
 
-import NetworkSelector from "./NetworkSelector";
+
 import AccountSelector from "./AccountSelector";
+import TopBar from "./TopBar";
+import NetworkSelector from "./NetworkSelector";
+
 import Wallet from "./Wallet";
 
 import { STORAGE_KEY_NETWORK_NAME, NETWORKS } from "./constants";
 
-const { getActiveAccountIndexFromStorage, getAccountIndexesArray, handleActiveAccountIndex, handleAccountIndexesArray } = require('./AccountHelper');
+const { getActiveAccountIndexFromStorage, getAccountIndexesArrayFromStorage, handleActiveAccountIndex, handleAccountIndexesArray } = require('./AccountHelper');
 
-export default function Home({ navigation, route }) {
+export default function Home({ }) {
+    const { height, width } = useWindowDimensions();
     const [network, setNetwork] = useState(null);
     const [activeAccountIndex, setActiveAccountIndex] = useState(null);
     const [accountIndexesArray, setAccountIndexesArray] = useState(null);
-/*
-    useEffect(() => {
-        AsyncStorage.clear();
-
-        SecureStore.deleteItemAsync("MNEMONIC_KEY");
-
-        for (let i = 0; i < 20; i++) {
-            SecureStore.deleteItemAsync("MNEMONIC_KEY" + i);    
-        }
-
-        
-        SecureStore.deleteItemAsync("MNEMONIC_KEY1");
-        SecureStore.deleteItemAsync("MNEMONIC_KEY01");
-        SecureStore.deleteItemAsync("MNEMONIC_KEY011");
-        SecureStore.deleteItemAsync("MNEMONIC_KEY0111");
-    }, []);
-*/
 
     useEffect(() => {
         handleNetwork = async () => {
@@ -54,24 +39,24 @@ export default function Home({ navigation, route }) {
         handleAccountIndexesArray(setAccountIndexesArray);
     }, []);
 
-    useEffect(() => {
-        const navigationListener = navigation.addListener('tabPress', (e) => {
-            handleActiveAccountIndex(setActiveAccountIndex);
-            handleAccountIndexesArray(setAccountIndexesArray);
-        });
-
-        return navigationListener;
-    }, [navigation]);
-
     if ((network == null) || (activeAccountIndex == null) || (accountIndexesArray == null)) {
         return <Text>Loading</Text>;
     }
 
+    const flexBar = 8;
+
     return (
         <>
-            <NetworkSelector network={network} setNetwork={setNetwork} />
-            <AccountSelector activeAccountIndex={activeAccountIndex} setActiveAccountIndex={setActiveAccountIndex} accountIndexesArray={accountIndexesArray} />
-            <Wallet activeAccountIndex={activeAccountIndex} network={network} scannedWalletConnectUrl={route.params?.scannedWalletConnectUrl}/>
+            <View style={{ flex: flexBar, backgroundColor: 'rgb(255,255,255)', borderWidth: 1 }} borderColor={"blue"} borderStyle={"solid"} >
+                <TopBar viewHeight={height / 100 * flexBar} viewWidth={width}/>
+            </View>
+            <View style={{ flex: flexBar, backgroundColor: 'rgb(255,255,255)' }} >
+                <NetworkSelector network={network} setNetwork={setNetwork} />
+                <AccountSelector activeAccountIndex={activeAccountIndex} setActiveAccountIndex={setActiveAccountIndex} accountIndexesArray={accountIndexesArray} />
+            </View>
+            <View style={{ flex: (100 - (flexBar * 2)), backgroundColor: 'rgb(255,255,255)' }} borderColor={"red"} borderStyle={"solid"}>
+                <Wallet activeAccountIndex={activeAccountIndex} network={network} />
+            </View>
         </>
     );
 }

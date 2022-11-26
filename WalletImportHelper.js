@@ -7,7 +7,7 @@ import { ethers } from "ethers";
 import * as SecureStore from 'expo-secure-store';
 import { MNEMONIC_KEY } from "./constants";
 
-const { getAccountIndexesArray, setAccountIndexesArray, getNextAccountIndex} = require('./AccountHelper');
+const { getAccountIndexesArrayFromStorage, getNextAccountIndex} = require('./AccountHelper');
 const { getItem, setItem } = require('./Storage');
 
 storeWallet = async (privateKey, mnemonicPhrase, mnemonicPathIndex, mnemonicPassword) => {
@@ -34,12 +34,7 @@ storeWallet = async (privateKey, mnemonicPhrase, mnemonicPathIndex, mnemonicPass
         "mnemonic": mnemonic
     };
 
-    try {
-        await SecureStore.setItemAsync(key, JSON.stringify(secrets));    
-    }
-    finally {
-        await setAccountIndexesArray(nextAccountIndex);
-    }
+    await SecureStore.setItemAsync(key, JSON.stringify(secrets));    
 
     return nextAccountIndex;
 }

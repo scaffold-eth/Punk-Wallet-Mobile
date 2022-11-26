@@ -1,22 +1,22 @@
-import { ACCOUNT_INDEXES_DELIMETER, ACCOUNT_INDEXES_KEY, ACTIVE_ACCOUNT_INDEX_KEY } from "./constants";
+import { ACCOUNT_INDEXES_DELIMETER, ACCOUNT_INDEXES_KEY, ACTIVE_ACCOUNT_INDEX_KEY, STORAGE_KEY_NETWORK_NAME, NETWORKS } from "./constants";
 
 const { getItem, setItem } = require('./Storage');
 
-getAccountIndexesArray = async () => {
+getAccountIndexesArrayFromStorage = async () => {
     const accountIndexesString = await getItem(ACCOUNT_INDEXES_KEY);
 
     if (!accountIndexesString) {
-        return [];
+        return [0];
     }
 
     return accountIndexesString.split(ACCOUNT_INDEXES_DELIMETER);
 }
-setAccountIndexesArray = async (nextAccountIndex) => {
-    let currentAccountIndexesArray = await getAccountIndexesArray();
+setAccountIndexesArrayToStorage = async (accountIndexesArray) => {
+    //let currentAccountIndexesArray = await getAccountIndexesArrayFromStorage();
 
-    currentAccountIndexesArray.push(nextAccountIndex);
+    //currentAccountIndexesArray.push(nextAccountIndex);
 
-    setItem(ACCOUNT_INDEXES_KEY, currentAccountIndexesArray.join(ACCOUNT_INDEXES_DELIMETER));
+    setItem(ACCOUNT_INDEXES_KEY, accountIndexesArray.join(ACCOUNT_INDEXES_DELIMETER));
 }
 
 getActiveAccountIndexFromStorage = async () => {
@@ -27,7 +27,7 @@ setActiveAccountIndexToStorage = (activeAccountIndex) => {
 }
 
 getNextAccountIndex = async () => {
-    const accountIndexesArray = await getAccountIndexesArray();
+    const accountIndexesArray = await getAccountIndexesArrayFromStorage();
 
     const length = accountIndexesArray.length;
 
@@ -44,12 +44,21 @@ handleActiveAccountIndex = async (setActiveAccountIndex) => {
     setActiveAccountIndex(activeAccountIndexFromStorage ? activeAccountIndexFromStorage : 0)
 }
 handleAccountIndexesArray = async (setAccountIndexesArray) => {
-    setAccountIndexesArray(await getAccountIndexesArray());
+    setAccountIndexesArray(await getAccountIndexesArrayFromStorage());
+}
+
+handleNetwork = async (setNetwork) => {
+    const storedNetworkKey = await getItem(STORAGE_KEY_NETWORK_NAME);
+
+    const networkKey = storedNetworkKey ? storedNetworkKey : Object.keys(NETWORKS)[0];
+
+    setNetwork(NETWORKS[networkKey]);
 }
 
 module.exports = {
-    getAccountIndexesArray, setAccountIndexesArray,
+    getAccountIndexesArrayFromStorage, setAccountIndexesArrayToStorage,
     getActiveAccountIndexFromStorage, setActiveAccountIndexToStorage,
     getNextAccountIndex,
-    handleActiveAccountIndex, handleAccountIndexesArray
+    handleActiveAccountIndex, handleAccountIndexesArray,
+    handleNetwork
 }

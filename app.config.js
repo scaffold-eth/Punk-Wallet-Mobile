@@ -11,6 +11,14 @@ module.exports = {
       TENDERLY_PROJECT: process.env.TENDERLY_PROJECT,
       TENDERLY_ACCESS_KEY: process.env.TENDERLY_ACCESS_KEY,
     },
+    "android": {
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/adaptive-icon.png",
+        "backgroundColor": "#FFFFFF"
+      },
+      "softwareKeyboardLayoutMode": "pan",
+      "package": "com.moltam89.walletconnectexpo"
+    },
     "ios": {
       "supportsTablet": true,
       "infoPlist": {

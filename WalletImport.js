@@ -8,7 +8,7 @@ const { getNextAccountIndex } = require('./AccountHelper');
 
 import CopyableText from "./CopyableText";
 
-export default function WalletImport({setWalletImport, setActiveAccount}) {
+export default function WalletImport({setWalletImport, handleNewAccount}) {
 	const [importMnemonic, setImportMnemonic] = useState();
 	const [importMnemonicIndex, setImportMnemonicIndex] = useState();
 	const [password, setPassword] = useState("");
@@ -82,7 +82,7 @@ export default function WalletImport({setWalletImport, setActiveAccount}) {
 			<Button title={'Save'} disabled={!save} onPress=
 				{async () => {
 					const activeAccountIndex = await storeWallet(importPrivatekey, importMnemonic, importMnemonicIndex, password);
-					setActiveAccount(activeAccountIndex);
+					handleNewAccount(activeAccountIndex);
 					setWalletImport(false)}
 				} />
     </View>
