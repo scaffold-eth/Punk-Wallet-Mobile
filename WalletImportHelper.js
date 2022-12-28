@@ -5,13 +5,12 @@ import "@ethersproject/shims"
 import { ethers } from "ethers";
 
 import * as SecureStore from 'expo-secure-store';
-import { MNEMONIC_KEY } from "./constants";
+import { MNEMONIC_KEY, MNEMONIC_DEFAULT_PATH_INDEX, MNEMONIC_DEFAULT_PASSWORD } from "./constants";
 
-const { getAccountIndexesArrayFromStorage, getNextAccountIndex} = require('./AccountHelper');
 const { getItem, setItem } = require('./Storage');
 
-storeWallet = async (privateKey, mnemonicPhrase, mnemonicPathIndex, mnemonicPassword) => {
-    const nextAccountIndex = await getNextAccountIndex();
+storeWallet = async (privateKey, mnemonicPhrase, mnemonicPathIndex, mnemonicPassword, accountHelper) => {
+    const nextAccountIndex = await accountHelper.getNextAccountIndex();
 
     const key = MNEMONIC_KEY + nextAccountIndex;
 
@@ -36,13 +35,17 @@ storeWallet = async (privateKey, mnemonicPhrase, mnemonicPathIndex, mnemonicPass
 
     await SecureStore.setItemAsync(key, JSON.stringify(secrets));    
 
-    return nextAccountIndex;
+    accountHelper.handleNewAccount(nextAccountIndex);
 }
 
-const generateWallet = () => {
-    return new ethers.Wallet.createRandom();
+const generateAndStoreWallet = async (accountHelper) => {
+    const wallet = new ethers.Wallet.createRandom();
+
+    await storeWallet(wallet.privateKey, wallet.mnemonic.phrase, MNEMONIC_DEFAULT_PATH_INDEX, MNEMONIC_DEFAULT_PASSWORD, accountHelper);
+
+    return wallet;
 }
 
 module.exports = {
-    generateWallet, storeWallet
+    generateAndStoreWallet, storeWallet
 }

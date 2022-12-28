@@ -1,6 +1,6 @@
 global.Buffer = global.Buffer || require('buffer').Buffer
 
-import { Button, Modal, Pressable, StyleSheet, Text, View} from 'react-native';
+import { Button, Modal, Pressable, StyleSheet, Text, TextInput, View} from 'react-native';
 import styled from 'styled-components/native';
 
 import { ethers } from "ethers";
@@ -10,8 +10,13 @@ import { Buffer } from "buffer";
 
 import React, { useState, useEffect } from "react";
 
+import ModalSkeleton from "./ModalSkeleton";
 import PeerMeta from "./PeerMeta";
+import ScannerOnly from "./ScannerOnly";
+import Scanner from "./Scanner";
 import WalletConnectTransactionDisplay from "./WalletConnectTransactionDisplay";
+
+import { SafeAreaProvider, SafeAreaView } from 'react-native-safe-area-context';
 
 const { approveSession, rejectSession, reset, subscribeToEvents, updateWalletConnectSession } = require('./WalletConnectWalletHelper');
 const { WalletConnectWalletHelper } = require('./WalletConnectWalletHelper');
@@ -28,8 +33,11 @@ const SActions = styled.View`
   justify-content: flex-end;
 `;
 
-export default function WalletConnectWallet({ chainId = 1, scannedWalletConnectUrl, wallet, setWalletConnectError, setWalletConnectErrorURL }) {
+export default function WalletConnectWallet({ chainId = 1, wallet, setWalletConnectError, setWalletConnectErrorURL, topBarViewHeight }) {
   log("WalletConnectWallet");
+
+  const [scanQR, setScanQR] = useState();
+  const [scannedWalletConnectUrl, setScannedWalletConnectUrl] = useState();
 
   const [callRequestPayload, setCallRequestPayload] = useState(null);
   const [connected, setConnected] = useState(false);
@@ -111,9 +119,73 @@ export default function WalletConnectWallet({ chainId = 1, scannedWalletConnectU
     }
   },[ chainId, wallet ]);
 
+    const content = () => (
+        <View>
+            <PeerMeta peerMeta={peerMeta}/>
+
+            <SActions>
+                <Pressable
+                    style={[styles.button, styles.buttonClose]}
+                    onPress={
+                        () => {
+                            walletConnectWalletHelper.rejectSession(connector);
+                        }
+                    }
+                >
+                <Text style={styles.textStyle}>Reject</Text>
+                </Pressable>
+
+                <Pressable
+                    style={[styles.button, styles.buttonClose]}
+                    onPress={
+                        () => {
+                            walletConnectWalletHelper.approveSession(connector, chainId, wallet.address);
+                        }
+                    }
+                    >
+                    <Text style={styles.textStyle}>Approve</Text>
+                </Pressable>
+            </SActions>
+        </View>
+    );
+
+   const contentScanner = () => (
+    <View style={{flex:1}}>
+      <ScannerOnly barCodeScanAction={setScannedWalletConnectUrl}/>
+    </View>
+    
+    
+
+    //<Scanner/>
+  );
+
+  const manualWalletConnect = 
+    (<>
+      <TextInput placeholder="Wallet Connect URL" />
+    </>);
+
+
   return (
-      <View>
-        {callRequestPayload && <WalletConnectTransactionDisplay chainId={chainId} connector={connector} payload={callRequestPayload} setCallRequestPayload={setCallRequestPayload}  wallet={wallet}/>}
+      <>
+        <Pressable
+            style={[styles.button, styles.buttonClose]}
+            onPress={
+                () => {
+                    setScanQR(true);
+                }
+            }
+        >
+          <Text style={styles.textStyle}>Scan WalletConnect</Text>
+        </Pressable>
+
+        {scanQR && 
+          <ModalSkeleton
+            content={contentScanner}
+            topBarViewHeight={topBarViewHeight}
+          />
+        }
+
+        {callRequestPayload && <WalletConnectTransactionDisplay chainId={chainId} connector={connector} payload={callRequestPayload} setCallRequestPayload={setCallRequestPayload}  wallet={wallet} topBarViewHeight={topBarViewHeight}/> }
 
         {(peerMeta && connected) &&
            <>
@@ -123,47 +195,12 @@ export default function WalletConnectWallet({ chainId = 1, scannedWalletConnectU
         }
 
         {(peerMeta && !connected) &&
-          <Modal
-            animationType="slide"
-            transparent={true}
-            
-            onRequestClose={() => {
-              //Alert.alert("Modal has been closed.");
-              //setModalVisible(!modalVisible);
-            }}
-          >
-            <View>
-              <View style={styles.modalView}>
-                <PeerMeta peerMeta={peerMeta}/>
-
-                <SActions>
-                  <Pressable
-                    style={[styles.button, styles.buttonClose]}
-                    onPress={
-                      () => {
-                        walletConnectWalletHelper.rejectSession(connector);
-                      }
-                    }
-                  >
-                    <Text style={styles.textStyle}>Reject</Text>
-                  </Pressable>
-
-                  <Pressable
-                    style={[styles.button, styles.buttonClose]}
-                    onPress={
-                      () => {
-                        walletConnectWalletHelper.approveSession(connector, chainId, wallet.address);
-                      }
-                    }
-                  >
-                    <Text style={styles.textStyle}>Approve</Text>
-                  </Pressable>
-                </SActions>
-              </View>
-            </View>
-           </Modal>
+          <ModalSkeleton
+            content={content}
+            topBarViewHeight={topBarViewHeight}
+          />
         }
-      </View>
+      </>
     );
 }
 

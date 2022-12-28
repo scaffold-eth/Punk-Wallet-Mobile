@@ -21,7 +21,7 @@ const SIcon = styled.Image`
 `;
 
 export default function PeerMeta({ peerMeta, connected }) {
-  console.log("connectedconnected", connected);
+  console.log("connectedconnecteddd", connected);
   return (
       <>
         <SIcon 

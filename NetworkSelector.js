@@ -7,7 +7,8 @@ import { STORAGE_KEY_NETWORK_NAME, NETWORKS } from "./constants";
 
 const { setItem } = require('./Storage');
 
-export default function NetworkSelector({ network, setNetwork }) {
+//export default function NetworkSelector({ network, setNetwork }) {
+export default function NetworkSelector({ accountHelper, setNetwork }) {
 	const [data, setData] = useState(null);
 
 	useEffect(() => {
@@ -25,12 +26,12 @@ export default function NetworkSelector({ network, setNetwork }) {
 	return (
 		<ModalSelector
 	        data={data}
-	        initValue={network.name}
+	        initValue={accountHelper.getNetwork().name}
 	        initValueTextStyle={{fontWeight: "bold", color:"black"}}
 	        onModalClose={(option)=> {
 	        	if (option && option.key) {
 	        		setItem(STORAGE_KEY_NETWORK_NAME, option.key)
-	        		setNetwork(NETWORKS[option.key]);
+	        		accountHelper.setNetwork(NETWORKS[option.key]);
 	        	}
 	        }
 	        }

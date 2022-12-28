@@ -3,20 +3,20 @@ import React, { useState, useEffect } from "react";
 
 const { setActiveAccountIndexToStorage } = require('./AccountHelper');
 
-export default function AccountSelector({ activeAccountIndex, setActiveAccountIndex, accountIndexesArray }) {
+export default function AccountSelector({ accountHelper }) {
 	const [data, setData] = useState(null);
 
 	useEffect(() => {
 		let accountIndexesData = [];
 		accountIndexesData.push({ key: -1, section: true, label: 'Accounts' })
 
-		accountIndexesArray.forEach(
+		accountHelper.getAccountIndexesArray().forEach(
 			(accountIndex) => {
 				accountIndexesData.push({ key:accountIndex, label: accountIndex });
 			});
 
 		setData(accountIndexesData);
-	}, [accountIndexesArray]);
+	}, [accountHelper.getAccountIndexesArray()]);
 
 	if (!data) {
 		return (<></>);
@@ -25,13 +25,13 @@ export default function AccountSelector({ activeAccountIndex, setActiveAccountIn
 	return (
 		<ModalSelector
 	        data={data}
-	        initValue={activeAccountIndex.toString()}
+	        initValue={accountHelper.getActiveAccountIndex().toString()}
 	        initValueTextStyle={{fontWeight: "bold", color:"black"}}
 	        sectionTextStyle={{fontWeight: "bold", color:"black"}}
 	        onModalClose={(option)=> {
 	        	if (option && option.key) {
-					setActiveAccountIndexToStorage(option.key);
-					setActiveAccountIndex(option.key);
+					accountHelper.setActiveAccountIndexToStorage(option.key);
+					accountHelper.setActiveAccountIndex(option.key);
 	        	}
 	        }
 	        }

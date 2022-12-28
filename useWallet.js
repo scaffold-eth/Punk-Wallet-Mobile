@@ -9,33 +9,27 @@ import * as SecureStore from 'expo-secure-store';
 
 import { MNEMONIC_KEY, MNEMONIC_DEFAULT_PATH_INDEX, MNEMONIC_DEFAULT_PASSWORD } from "./constants";
 
-const { generateWallet, storeWallet } = require('./WalletImportHelper');
+const { generateAndStoreWallet, storeWallet } = require('./WalletImportHelper');
 
-const useWallet = (network, activeAccountIndex) => {
+const useWallet = (accountHelper) => {
     log("useWallet");
 
     const [wallet, setWallet] = useState();
 
     useEffect(() => {
         const getOrCreateWallet = async () => {
-            const mnemonic = await SecureStore.getItemAsync(MNEMONIC_KEY + activeAccountIndex);
+            const mnemonic = await SecureStore.getItemAsync(MNEMONIC_KEY + accountHelper.getActiveAccountIndex());
 
             let wallet = null;
 
-            if (!mnemonic && (activeAccountIndex == 0)) {
-                wallet = generateWallet();
-
-                await storeWallet(wallet.privateKey, wallet.mnemonic.phrase, MNEMONIC_DEFAULT_PATH_INDEX, MNEMONIC_DEFAULT_PASSWORD);
+            if (!mnemonic && (accountHelper.getActiveAccountIndex() == 0)) {
+                wallet = await generateAndStoreWallet(accountHelper);
             }
             else {
                 wallet = new ethers.Wallet(JSON.parse(mnemonic).privateKey);
             }
 
-            //wallet = new ethers.Wallet("0x89f0086b69dd305726787b6d86037a34d59805163096aa198005a2c1fba2440b");
-            //wallet = new ethers.Wallet("0xf78f8b27a3c2189614b75cd47760f3f63fed84c1b776824daa8734bdc37ef237");
-            
-
-            const provider = network ? new ethers.providers.StaticJsonRpcProvider(network.rpcUrl) : null;
+            const provider = accountHelper.getNetwork() ? new ethers.providers.StaticJsonRpcProvider(accountHelper.getNetwork().rpcUrl) : null;
 
             if (provider) {
                 wallet = wallet.connect(provider);
@@ -44,20 +38,20 @@ const useWallet = (network, activeAccountIndex) => {
             setWallet(wallet);
         }
 
-        if (activeAccountIndex != null) {
+        if (accountHelper.getActiveAccountIndex() != null) {
             getOrCreateWallet();
         }
-    }, [activeAccountIndex]);
+    }, [accountHelper.getActiveAccountIndex()]);
 
     useEffect(() => {
-        if (!wallet || !network?.rpcUrl) {
+        if (!wallet || !accountHelper.getNetwork()?.rpcUrl) {
             return;
         }
 
-        const provider = new ethers.providers.StaticJsonRpcProvider(network.rpcUrl);
+        const provider = new ethers.providers.StaticJsonRpcProvider(accountHelper.getNetwork().rpcUrl);
 
         setWallet(wallet.connect(provider));
-    }, [network]);
+    }, [accountHelper.getNetwork()]);
 
     return wallet;
 }

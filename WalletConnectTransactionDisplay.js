@@ -4,6 +4,7 @@ import { ethers } from "ethers";
 
 import styled from 'styled-components/native';
 
+import ModalSkeleton from "./ModalSkeleton";
 import TenderlySimulation from "./TenderlySimulation";
 
 const { WalletConnectTransactionDisplayHelper } = require('./WalletConnectTransactionDisplayHelper');
@@ -18,7 +19,7 @@ const SActions = styled.View`
   flexDirection: row;
 `;
 
-export default function WalletConnectTransactionDisplay({ chainId, connector, payload, setCallRequestPayload, wallet }) {
+export default function WalletConnectTransactionDisplay({ chainId, connector, payload, setCallRequestPayload, wallet, topBarViewHeight }) {
   log("WalletConnectTransactionDisplay");
   const [details, setDetails] = useState();
 
@@ -44,54 +45,51 @@ export default function WalletConnectTransactionDisplay({ chainId, connector, pa
     return (<></>);
   }
 
+  const content = () => (<>
+        <View style={{ flex:1}} >
+          {/*<TenderlySimulation chainId={chainId} payload={payload}/>*/}
+
+          {value && to && <Text style={{textAlign: "center", marginTop: 20}}>
+            Wanna send 
+            <Text style={{fontWeight: "bold"}}> {value} Ξ </Text>
+             to {to}
+           </Text>}
+
+          <SActions>
+            <Pressable
+              style={[styles.button, styles.buttonClose]}
+              onPress={() =>{
+                walletConnectTransactionDisplayHelper.rejectRequest();
+                setCallRequestPayload(null);
+              } }
+            >
+              <Text style={styles.textStyle}>Reject</Text>
+            </Pressable>
+
+            <Pressable
+              style={[styles.button, styles.buttonClose]}
+              onPress={() => {
+                walletConnectTransactionDisplayHelper.approveRequest();
+                setCallRequestPayload(null);
+              }}
+            >
+              <Text style={styles.textStyle}>Approve</Text>
+            </Pressable>
+          </SActions>
+
+          <Button title="Details" onPress={() => setDetails(!details)} />
+
+          {details && <Text>
+            {JSON.stringify(payload.params, null, 2)}
+          </Text>}
+      </View>
+    </>);
+
   return (
-  	<View>
-   		<Modal
-        animationType="slide"
-        transparent={true}
-      >
-        <View>
-          <View style={styles.modalView}>
-          	<TenderlySimulation chainId={chainId} payload={payload}/>
-
-            {value && to && <Text style={{textAlign: "center", marginTop: 20}}>
-              Wanna send 
-              <Text style={{fontWeight: "bold"}}> {value} Ξ </Text>
-               to {to}
-             </Text>}
-
-            <SActions>
-              <Pressable
-                style={[styles.button, styles.buttonClose]}
-                onPress={() =>{
-                  walletConnectTransactionDisplayHelper.rejectRequest();
-                  setCallRequestPayload(null);
-                } }
-              >
-                <Text style={styles.textStyle}>Reject</Text>
-              </Pressable>
-
-              <Pressable
-                style={[styles.button, styles.buttonClose]}
-                onPress={() => {
-                  walletConnectTransactionDisplayHelper.approveRequest();
-                  setCallRequestPayload(null);
-                }}
-              >
-                <Text style={styles.textStyle}>Approve</Text>
-              </Pressable>
-            </SActions>
-
-            <Button title="Details" onPress={() => setDetails(!details)} />
-
-            {details && <Text>
-              {JSON.stringify(payload.params, null, 2)}
-            </Text>}
-
-          </View>
-        </View>
-      </Modal>
-    </View>
+    <ModalSkeleton
+        content={content}
+        topBarViewHeight={topBarViewHeight}
+    />
   );
 }
 

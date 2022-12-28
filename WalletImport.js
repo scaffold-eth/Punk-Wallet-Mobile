@@ -4,11 +4,10 @@ import React, { useState, useEffect } from "react";
 import { Button, StyleSheet, Text, TextInput, View } from 'react-native';
 
 const { storeWallet } = require('./WalletImportHelper');
-const { getNextAccountIndex } = require('./AccountHelper');
 
 import CopyableText from "./CopyableText";
 
-export default function WalletImport({setWalletImport, handleNewAccount}) {
+export default function WalletImport({setWalletImport, accountHelper}) {
 	const [importMnemonic, setImportMnemonic] = useState();
 	const [importMnemonicIndex, setImportMnemonicIndex] = useState();
 	const [password, setPassword] = useState("");
@@ -81,8 +80,7 @@ export default function WalletImport({setWalletImport, handleNewAccount}) {
 			<Button title={'Cancel'} onPress={() => setWalletImport(false)} />
 			<Button title={'Save'} disabled={!save} onPress=
 				{async () => {
-					const activeAccountIndex = await storeWallet(importPrivatekey, importMnemonic, importMnemonicIndex, password);
-					handleNewAccount(activeAccountIndex);
+					const activeAccountIndex = await storeWallet(importPrivatekey, importMnemonic, importMnemonicIndex, password, accountHelper);
 					setWalletImport(false)}
 				} />
     </View>

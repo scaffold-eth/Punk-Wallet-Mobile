@@ -9,11 +9,11 @@ import { MNEMONIC_KEY } from "./constants";
 
 import * as Clipboard from 'expo-clipboard';
 
-export default function WalletRevealKey( {activeAccountIndex } ) {
+export default function WalletRevealKey( {setWalletReveal, accountHelper } ) {
 	const [mnemonic, setMnemonic] = useState(null);
-	const [reveal, setReveal] = useState(false);
 
 	useEffect(() => {
+/*		
 		if (!reveal) {
 			if (mnemonic) {
 				setMnemonic(null);
@@ -21,13 +21,13 @@ export default function WalletRevealKey( {activeAccountIndex } ) {
 
 			return;
 		}
-
+*/
 		const getMnemonic = async () => {
-			setMnemonic(JSON.parse(await SecureStore.getItemAsync(MNEMONIC_KEY + activeAccountIndex)));
+			setMnemonic(JSON.parse(await SecureStore.getItemAsync(MNEMONIC_KEY + accountHelper.getActiveAccountIndex())));
 		}
 
 		getMnemonic();
-	}, [reveal, activeAccountIndex]);
+	}, [accountHelper.getActiveAccountIndex()]);
 
 	const onPressTitle = (string) => {
     Clipboard.setString(string);
@@ -42,8 +42,7 @@ export default function WalletRevealKey( {activeAccountIndex } ) {
 		    	<CopyableText text={mnemonic.mnemonic.password} title={"Password:"}/>
 		    </>}
 
-		    {!reveal && <Button title="Reveal Private Key" onPress={() => setReveal(true)} />}
-		    {reveal &&  <Button title="Hide Private Key" onPress={() => setReveal(false)} />}
+		    <Button title={'Ok'} onPress={() => setWalletReveal(false)} />
 	  	</>
 	);
 }

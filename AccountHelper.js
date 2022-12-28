@@ -2,63 +2,101 @@ import { ACCOUNT_INDEXES_DELIMETER, ACCOUNT_INDEXES_KEY, ACTIVE_ACCOUNT_INDEX_KE
 
 const { getItem, setItem } = require('./Storage');
 
-getAccountIndexesArrayFromStorage = async () => {
-    const accountIndexesString = await getItem(ACCOUNT_INDEXES_KEY);
-
-    if (!accountIndexesString) {
-        return [0];
+class AccountHelper {
+    constructor(activeAccountIndex, setActiveAccountIndex, accountIndexesArray, setAccountIndexesArray, network, setNetwork) {
+        this.activeAccountIndex = activeAccountIndex;
+        this.setActiveAccountIndex = setActiveAccountIndex;
+        this.accountIndexesArray = accountIndexesArray;
+        this.setAccountIndexesArray = setAccountIndexesArray;
+        this.network = network;
+        this.setNetwork = setNetwork;
     }
 
-    return accountIndexesString.split(ACCOUNT_INDEXES_DELIMETER);
-}
-setAccountIndexesArrayToStorage = async (accountIndexesArray) => {
-    //let currentAccountIndexesArray = await getAccountIndexesArrayFromStorage();
+    getAccountIndexesArrayFromStorage = async () => {
+        const accountIndexesString = await getItem(ACCOUNT_INDEXES_KEY);
 
-    //currentAccountIndexesArray.push(nextAccountIndex);
+        if (!accountIndexesString) {
+            return null;
+        }
 
-    setItem(ACCOUNT_INDEXES_KEY, accountIndexesArray.join(ACCOUNT_INDEXES_DELIMETER));
-}
-
-getActiveAccountIndexFromStorage = async () => {
-    return (await getItem(ACTIVE_ACCOUNT_INDEX_KEY));
-}
-setActiveAccountIndexToStorage = (activeAccountIndex) => {
-    setItem(ACTIVE_ACCOUNT_INDEX_KEY, activeAccountIndex.toString());
-}
-
-getNextAccountIndex = async () => {
-    const accountIndexesArray = await getAccountIndexesArrayFromStorage();
-
-    const length = accountIndexesArray.length;
-
-    if (length == 0) {
-        return 0;
+        return accountIndexesString.split(ACCOUNT_INDEXES_DELIMETER);
+    }
+    setAccountIndexesArrayToStorage = async (newAccountIndexesArray) => {
+        await setItem(ACCOUNT_INDEXES_KEY, newAccountIndexesArray.join(ACCOUNT_INDEXES_DELIMETER));
     }
 
-    return (parseInt(accountIndexesArray[length -1]) + 1);
-}
+    getActiveAccountIndexFromStorage = async () => {
+        return (await getItem(ACTIVE_ACCOUNT_INDEX_KEY));
+    }
+    setActiveAccountIndexToStorage = async (newActiveAccountIndex) => {
+        await setItem(ACTIVE_ACCOUNT_INDEX_KEY, newActiveAccountIndex.toString());
+    }
 
-handleActiveAccountIndex = async (setActiveAccountIndex) => {
-    const activeAccountIndexFromStorage = await getActiveAccountIndexFromStorage();
+    getNextAccountIndex = async () => {
+        const accountIndexesArrayFromStorage = await this.getAccountIndexesArrayFromStorage();
 
-    setActiveAccountIndex(activeAccountIndexFromStorage ? activeAccountIndexFromStorage : 0)
-}
-handleAccountIndexesArray = async (setAccountIndexesArray) => {
-    setAccountIndexesArray(await getAccountIndexesArrayFromStorage());
-}
+        const length = accountIndexesArrayFromStorage ? accountIndexesArrayFromStorage.length : 0;
 
-handleNetwork = async (setNetwork) => {
-    const storedNetworkKey = await getItem(STORAGE_KEY_NETWORK_NAME);
+        if (length == 0) {
+            return 0;
+        }
 
-    const networkKey = storedNetworkKey ? storedNetworkKey : Object.keys(NETWORKS)[0];
+        return (parseInt(accountIndexesArrayFromStorage[length -1]) + 1);
+    }
 
-    setNetwork(NETWORKS[networkKey]);
+    handleActiveAccountIndex = async () => {
+        const activeAccountIndexFromStorage = await this.getActiveAccountIndexFromStorage();
+
+        this.setActiveAccountIndex(activeAccountIndexFromStorage ? activeAccountIndexFromStorage : 0)
+    }
+    handleAccountIndexesArray = async () => {
+        const accountIndexesArrayFromStorage = await this.getAccountIndexesArrayFromStorage();
+
+        this.setAccountIndexesArray(accountIndexesArrayFromStorage ? accountIndexesArrayFromStorage : [0]);
+    }
+    handleNetwork = async () => {
+        const storedNetworkKey = await getItem(STORAGE_KEY_NETWORK_NAME);
+
+        const networkKey = storedNetworkKey ? storedNetworkKey : Object.keys(NETWORKS)[0];
+
+        this.setNetwork(NETWORKS[networkKey]);
+    }
+    handleNewAccount = async (newAccountIndex) => {
+        let newAccountIndexesArray = JSON.parse(JSON.stringify(this.accountIndexesArray ? this.accountIndexesArray : [0])); // Deep copy, not sure if this is really needed
+        
+        if (newAccountIndex != 0) {
+            newAccountIndexesArray.push(newAccountIndex);    
+        }
+
+        await this.setAccountIndexesArrayToStorage(newAccountIndexesArray);
+        await this.setActiveAccountIndexToStorage(newAccountIndex);
+
+        this.setActiveAccountIndex(newAccountIndex);
+        this.setAccountIndexesArray(newAccountIndexesArray);
+    }
+
+    getActiveAccountIndex = () => {
+        return this.activeAccountIndex;
+    }
+    setActiveAccountIndex = (newActiveAccountIndex) => {
+        return this.setActiveAccountIndex(newActiveAccountIndex);
+    }
+
+    getAccountIndexesArray = () => {
+        return this.accountIndexesArray;
+    }
+    setAccountIndexesArray = (newAccountIndexesArray) => {
+        return this.setAccountIndexesArray(newAccountIndexesArray);
+    }
+
+    getNetwork = () => {
+        return this.network;
+    }
+    setNetwork = (newNetwork) => {
+        return this.setNetwork(newNetwork);
+    }
 }
 
 module.exports = {
-    getAccountIndexesArrayFromStorage, setAccountIndexesArrayToStorage,
-    getActiveAccountIndexFromStorage, setActiveAccountIndexToStorage,
-    getNextAccountIndex,
-    handleActiveAccountIndex, handleAccountIndexesArray,
-    handleNetwork
+    AccountHelper
 }

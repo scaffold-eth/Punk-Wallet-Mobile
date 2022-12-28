@@ -24,10 +24,10 @@ export default function Balance({ provider, address, chainId }) {
         }
 
         const getBalance = async () => {
-            setBalance(await provider.getBalance("0x8c9d11ce64289701efeb6a68c16e849e9a2e781d"));
+            //setBalance(await provider.getBalance("0x8c9d11ce64289701efeb6a68c16e849e9a2e781d"));
             // balance = await provider.getBalance("ethers.eth")
 
-            //setBalance(await provider.getBalance(address));
+            setBalance(await provider.getBalance(address));
         }
 
         getBalance();

@@ -1,13 +1,13 @@
 import React, { useState, useEffect } from "react";
-import { Button, Image, Modal, Pressable, StyleSheet, Text, View } from 'react-native';
+import { Button, Image, Pressable, Text, View } from 'react-native';
 
 import { Ionicons } from '@expo/vector-icons';
 
 import { SafeAreaProvider, SafeAreaView } from 'react-native-safe-area-context';
 
 import AccountSelector from "./AccountSelector";
-import WalletSecrets from "./WalletSecrets";
-
+import QrModal from "./QrModal";
+import WalletModal from "./WalletModal";
 
 const { calculatePunkIndex } = require('./WalletHelper');
 
@@ -16,85 +16,30 @@ const ICON_PERCENTAGE = 0.45;
 const FONT_PERCENTAGE = 0.8;
 
 export default function TopBar({
-        address,
-        viewHeight,
+        wallet,
+        topBarViewHeight,
         viewWidth,
         punkIndex,
-        activeAccountIndex,
-        setActiveAccountIndex,
-        accountIndexesArray,
-        setAccountIndexesArray }) {
-
-    const styles = StyleSheet.create({
-      modalView: {
-        margin: 20,
-        marginTop: viewHeight,
-        backgroundColor: "white",
-        borderRadius: 20,
-        padding: 20,
-        alignItems: "center",
-        shadowColor: "#000",
-        shadowOffset: {
-          width: 0,
-          height: 2
-        },
-        shadowOpacity: 0.25,
-        shadowRadius: 4,
-        elevation: 5
-      }
-    });
+        accountHelper
+    }) {
 
     const [walletPushed, setWalletPushed] = useState(false);
+    const [qrPushed, setQrPushed] = useState(false);
 
     const handleWalletPushed = () => {
         console.log("handleWalletPushed", walletPushed);
         setWalletPushed(!walletPushed);
     }
 
-    const iconSize = viewHeight * ICON_PERCENTAGE;
+    console.log("punkIndex", punkIndex);
+
+    const handleQrPushed = () => {
+        console.log("qrPushed", qrPushed);
+        setQrPushed(!qrPushed);
+    }
+
+    const iconSize = topBarViewHeight * ICON_PERCENTAGE;
     const fontSize = iconSize * FONT_PERCENTAGE;
-
-    const myText = () => (<>
-         <Modal
-            animationType="slide"
-            transparent={true}
-            
-            onRequestClose={() => {
-              //Alert.alert("Modal has been closed.");
-              //setModalVisible(!modalVisible);
-            }}
-          >
-                  <Modal
-            animationType="slide"
-            transparent={true}
-            
-            onRequestClose={() => {
-              //Alert.alert("Modal has been closed.");
-              //setModalVisible(!modalVisible);
-            }}
-          >
-            <SafeAreaProvider>
-            <SafeAreaView style={{ flex: 1 }}>
-              <View style={styles.modalView}>
-                <WalletSecrets
-                    activeAccountIndex={activeAccountIndex}
-                    setActiveAccountIndex={setActiveAccountIndex}
-                    accountIndexesArray={accountIndexesArray}
-                    setAccountIndexesArray={setAccountIndexesArray}>
-                </WalletSecrets>
-
-                <Pressable style={{backgroundColor:"lightgray", alignItems:"center", justifyContent:"center"}} onPress={() => {handleWalletPushed()}}>
-                    <Text>Close</Text>
-                </Pressable>
-                
-
-              </View>
-            </SafeAreaView>
-            </SafeAreaProvider>
-           </Modal>
-
-           </Modal>
-    </>);
 
     const styledIonicon = (name, onPressFunction) => (<>
          <Ionicons
@@ -112,15 +57,46 @@ export default function TopBar({
              }/>
     </>);
 
+                 //<View style={{ borderWidth: 1 }} borderColor={"blue"} borderStyle={"solid"} >
+
+    if (true) {
+        return (
+            <>
+                 <View style={{ flex: 1,  borderWidth: 1}} borderColor={"red"} borderStyle={"solid"} >
+                 </View>
+            </>
+        );
+    }
+
     return (
        <>
-           {walletPushed && myText()}
-           <View style={{ flex: 1, flexDirection: "row", alignItems:"center" }} >
-               <View style={{ flex: 0.5, flexDirection: "row", paddingLeft:iconSize}} >
+           {walletPushed && <WalletModal handleWalletPushed={handleWalletPushed} fontSize={fontSize} iconSize={iconSize} topBarViewHeight={topBarViewHeight} accountHelper={accountHelper}/>}
+           {qrPushed && <QrModal topBarViewHeight={topBarViewHeight} wallet={wallet}/>}
+
+           <View style={{ flex: 1, flexDirection: "row", alignItems:"center", justifyContent:"center",  borderWidth: 1 }} borderColor={"red"} borderStyle={"solid"} >
+                
+                   <View>
+                       <Text style={{fontSize: fontSize}}>
+                           {false && wallet.address.slice(0, ADDRESS_SLICE)}
+                           monyo.eth
+                       </Text>
+                   </View>
+
+                    <View style={{ paddingBottom: iconSize * 0.18 }}>
+                        <Image
+                            style={{ width: iconSize, height: iconSize }}
+                            source={{
+                              uri: `https://www.larvalabs.com/public/images/cryptopunks/punk${punkIndex}.png`
+                            }}
+                        />
+                    </View>
+               
+
+
+               {/* 
+                <View style={{ flex: 0.5, flexDirection: "row", paddingLeft:iconSize}} >
                     <AccountSelector
-                        activeAccountIndex={activeAccountIndex}
-                        setActiveAccountIndex={setActiveAccountIndex}
-                        accountIndexesArray={accountIndexesArray}
+                        accountHelper={accountHelper}
                     />
 
                     <Image
@@ -131,19 +107,21 @@ export default function TopBar({
                     />
 
                    <Text style={{fontSize: fontSize}}>
-                       {address.slice(0, ADDRESS_SLICE)}
+                       {wallet.address.slice(0, ADDRESS_SLICE)}
                    </Text>
 
-                   {styledIonicon("copy-outline")}
+                   {styledIonicon("qr-code-outline", handleQrPushed)}
                </View>
                <View style={{ flex: 0.5, flexDirection: "row", justifyContent:"flex-end"}} >
                    <View style={{ paddingRight: iconSize}}>
-                       {styledIonicon("refresh-outline")}
+                       
                    </View>
                    <View style={{ paddingRight: iconSize}}>
                        {styledIonicon("wallet-outline", handleWalletPushed)}
                    </View>
                </View>
+               */}
+
            </View>
        </>
     );

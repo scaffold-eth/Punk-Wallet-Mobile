@@ -1,54 +1,76 @@
-import { Button, Text } from 'react-native';
+import { Button, Pressable, Text, View } from 'react-native';
 import React, { useState, useEffect } from "react";
+
+import { Ionicons } from '@expo/vector-icons';
 
 import WalletImport from "./WalletImport";
 import WalletRevealKey from "./WalletRevealKey";
 
 import AccountSelector from "./AccountSelector";
 
-const { handleActiveAccountIndex, handleAccountIndexesArray, setActiveAccountIndexToStorage } = require('./AccountHelper');
-const { generateWallet, storeWallet } = require('./WalletImportHelper');
+const { generateAndStoreWallet, storeWallet } = require('./WalletImportHelper');
 
-export default function WalletSecrets({ activeAccountIndex, setActiveAccountIndex, accountIndexesArray, setAccountIndexesArray }) {
+export default function WalletSecrets({ accountHelper, fontSize, iconSize}) {
     log("WalletSecrets")
     const [walletImport, setWalletImport] = useState();
-
-    const generateAccount = async () => {
-        const wallet = generateWallet();
-        
-        const newAccountIndex = await storeWallet(wallet.privateKey, wallet.mnemonic.phrase, 0, "");
-        handleNewAccount(newAccountIndex);
-    }
-
-    const handleNewAccount = (newAccountIndex) => {
-        setActiveAccountIndexToStorage(newAccountIndex);
-
-        let newAccountIndexesArray = JSON.parse(JSON.stringify(accountIndexesArray)); // Deep copy, not sure if this is really needed
-        newAccountIndexesArray.push(newAccountIndex);
-        setAccountIndexesArrayToStorage(newAccountIndexesArray);
-
-        setActiveAccountIndex(newAccountIndex);
-        setAccountIndexesArray(newAccountIndexesArray);
-    }
+    const [walletReveal, setWalletReveal] = useState();
 
     if (walletImport) {
         return (
             <>
-                <WalletImport setWalletImport={setWalletImport} handleNewAccount={handleNewAccount} />
+                <WalletImport setWalletImport={setWalletImport} accountHelper={accountHelper} />
             </>
         );
     }
 
+    if (walletReveal) {
+        return (
+            <>
+                <AccountSelector accountHelper={accountHelper}/>
+                <WalletRevealKey setWalletReveal={setWalletReveal} accountHelper={accountHelper} />
+            </>
+        );
+    }
+
+    const section = (onPressAction, param, text, iconName) => (
+        <Pressable
+            style={{flex:0.2, backgroundColor:"rgb(250,250,250)", borderRadius: 20}}
+            onPress={() => {onPressAction(param)}}>
+
+            <View style={{ flex:1, alignItems:"center", justifyContent:"center"}}>
+                <Text style={{fontSize: fontSize}}>
+                    {text}
+                </Text>
+
+                <Ionicons
+                    name={iconName}
+                    size={iconSize}
+                    color={"rgb(24,144,255)"}
+                />
+            </View>
+        </Pressable>
+    );
+
 	return (
         <>
-            <AccountSelector
-                activeAccountIndex={activeAccountIndex}
-                setActiveAccountIndex={setActiveAccountIndex}
-                accountIndexesArray={accountIndexesArray}
-            />
-        	<WalletRevealKey activeAccountIndex={activeAccountIndex}/>
-            <Button title={'Import'} onPress={() => setWalletImport(true)} />
-            <Button title={'Generate'} onPress={() => generateAccount()} />
+            <View style={{ flex:0.1}} >
+                <AccountSelector accountHelper={accountHelper}/>
+            </View>
+
+            <View style={{ flex:0.9}}>
+                <View style={{ flex:0.1}}/>
+
+                {section(setWalletReveal, true, "Reveal secret", "alert-circle-outline")}
+
+                <View style={{ flex:0.1}}/>
+
+                {section(setWalletImport, true, "Import account", "arrow-up-circle-outline")}
+
+                <View style={{ flex:0.1}}/>
+
+                {section(generateAndStoreWallet, accountHelper, "Generate account", "add-circle-outline")}
+
+            </View>
         </>
     );
 }
