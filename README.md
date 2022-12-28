@@ -1,3 +1,6 @@
+Another possible design, with draggable icons:
+
+<img width="1780" alt="image" src="https://user-images.githubusercontent.com/1397179/209806677-9f11faa3-b48f-4791-aca4-fd8c96f5c2fb.png">
 
 # 🏗 Wallet Connect Expo
 
