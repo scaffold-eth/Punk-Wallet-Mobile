@@ -5,8 +5,8 @@ Super simple wallet connect wallet.
 
 # 🏄‍♂️ Quick Start
 ```bash
-git clone https://github.com/moltam89/WalletConnectExpo
-cd WalletConnectExpo
+git clone https://github.com/scaffold-eth/Punk-Wallet-Mobile
+cd Punk-Wallet-Mobile
 npm install
 expo install
 expo start (or expo start --tunnel)
